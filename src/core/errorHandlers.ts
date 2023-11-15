@@ -9,4 +9,7 @@ const handleNotFound = (res: Response) =>
 const handleServerError = (res: Response) =>
   res.status(500).json({ error: "Error al procesar la solicitud" });
 
-export { handleBadRequest, handleNotFound, handleServerError };
+const handleUnauthorized = (res: Response) =>
+  res.status(403).json({ error: "Unauthorized: Access denied." });
+
+export { handleBadRequest, handleNotFound, handleServerError, handleUnauthorized };

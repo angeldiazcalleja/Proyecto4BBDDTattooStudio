@@ -4,7 +4,7 @@ import {
   handleBadRequest,
   handleNotFound,
   handleServerError,
-} from "../../core/errorHandlers";
+} from "../../src/core/errorHandlers";
 
 export const saveArtists = async (req: Request, res: Response) => {
   try {

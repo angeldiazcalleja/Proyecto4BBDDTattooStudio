@@ -12,14 +12,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.modifyUser = exports.findUser = exports.findUsers = exports.saveUsers = void 0;
+exports.deleteUser = exports.modifyUser = exports.findUser = exports.findUsers = exports.register = void 0;
 const model_1 = require("./model");
-const errorHandlers_1 = require("../../core/errorHandlers");
+const errorHandlers_1 = require("../../src/core/errorHandlers");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const saveUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// import { ulid } from "ulid";
+const config_1 = __importDefault(require("../../src/core/config"));
+const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { name, surname, email, phone, password } = req.body;
-        if (!name || !surname || !email || !phone || !password) {
+        const { name, surname, email, phone, password, role } = req.body;
+        if (!name || !surname || !email || !phone || !password || !role) {
             return (0, errorHandlers_1.handleBadRequest)(res);
         }
         const userFound = yield model_1.userExtendedModel.findOne({ email });
@@ -29,25 +31,19 @@ const saveUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: "Ya existe un usuario registrado con ese correo electrónico.",
             });
         }
-        const hashedPassword = bcrypt_1.default.hashSync(password, 5);
+        const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
         const newUser = new model_1.userExtendedModel({
             name,
             surname,
             email,
             phone,
             password: hashedPassword,
-            id: Date.now(),
         });
         const result = yield newUser.save();
         return res.status(200).json({
             success: true,
             message: "Usuario registrado con éxito",
-            userRegistered: {
-                name: result.name,
-                surname: result.surname,
-                email: result.email,
-                phone: result.phone,
-            },
+            userRegistered: result.toObject(), // Convierte el objeto Mongoose a un objeto plano
         });
     }
     catch (error) {
@@ -55,13 +51,27 @@ const saveUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return (0, errorHandlers_1.handleServerError)(res);
     }
 });
-exports.saveUsers = saveUsers;
+exports.register = register;
 const findUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield model_1.userExtendedModel.find();
+        let users = yield model_1.userExtendedModel.find();
+        const { sort, search, role } = req.query;
+        if (role && typeof role === "string") {
+            users = users.filter((user) => user.role === role);
+        }
+        if (sort === "ASC") {
+            users = users.sort((a, b) => a.name.localeCompare(b.name));
+        }
+        else if (sort === "DSC") {
+            users = users.sort((a, b) => b.name.localeCompare(a.name));
+        }
+        if (search && typeof search === "string") {
+            users = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
+        }
         return res.status(200).json(users);
     }
     catch (error) {
+        console.error("Error:", error);
         return (0, errorHandlers_1.handleServerError)(res);
     }
 });
@@ -69,13 +79,11 @@ exports.findUsers = findUsers;
 const findUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const user = yield model_1.userExtendedModel.findOne({ id: parseInt(id) });
-        if (user) {
-            return res.status(200).json(user);
-        }
-        else {
-            return (0, errorHandlers_1.handleNotFound)(res);
-        }
+        const user = yield model_1.userExtendedModel.findOne({
+            id: parseInt(id),
+            isDeleted: false,
+        });
+        return user ? res.status(200).json(user) : (0, errorHandlers_1.handleNotFound)(res);
     }
     catch (error) {
         return (0, errorHandlers_1.handleServerError)(res);
@@ -105,15 +113,22 @@ const modifyUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.modifyUser = modifyUser;
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     try {
         const { id } = req.params;
-        const result = yield model_1.userExtendedModel.deleteOne({ id: parseInt(id) });
-        if (result.deletedCount === 1) {
-            return res.status(200).json(result);
+        const userIdFromToken = (_a = req.token) === null || _a === void 0 ? void 0 : _a.id;
+        const roleIdFromToken = (_b = req.token) === null || _b === void 0 ? void 0 : _b.role;
+        // Verifica permisos del cliente
+        if (roleIdFromToken === "customer" && (userIdFromToken === null || userIdFromToken === void 0 ? void 0 : userIdFromToken.toString()) !== id) {
+            return res.status(403).json({
+                success: false,
+                message: "No tienes permisos para eliminar esta cuenta.",
+            });
         }
-        else {
-            return (0, errorHandlers_1.handleNotFound)(res);
-        }
+        const result = yield model_1.userExtendedModel.updateOne({ id: parseInt(id) }, { isDeleted: true });
+        return result.modifiedCount === 1
+            ? res.status(200).json(result)
+            : (0, errorHandlers_1.handleNotFound)(res);
     }
     catch (error) {
         return (0, errorHandlers_1.handleServerError)(res);

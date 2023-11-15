@@ -19,4 +19,3 @@ export const TattooArtistsExtendedModel = mongoose.model<tattooArtistsExtendedDo
   "TattoArtists",
   TattooArtistsExtendedSchema
 );
-

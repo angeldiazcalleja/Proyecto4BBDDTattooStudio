@@ -1,6 +1,4 @@
 "use strict";
-// import express from "express";
-// import * as UserController from "./controllers";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -28,21 +26,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// const router = express.Router();
-// router.post("/", UserController.register);
-// router.get("/", UserController.findUsers);
-// router.get("/:id", UserController.findUser);
-// router.put("/:id", UserController.modifyUser);
-// router.delete("/:id", UserController.deleteUser);
-// export default router;
 const express_1 = __importDefault(require("express"));
 const UserController = __importStar(require("./controllers"));
-const authMiddleware_1 = require("../../src/middleware/authMiddleware");
+const authMiddleware_1 = require("../../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.post("/", UserController.register);
 router.get("/", authMiddleware_1.authMiddleware, UserController.findUsers);
-router.get("/:id", authMiddleware_1.authMiddleware, UserController.findUser);
-router.put("/:id", authMiddleware_1.authMiddleware, UserController.modifyUser);
-router.delete("/:id", authMiddleware_1.authMiddleware, UserController.deleteUser);
+router.get("/:_id", authMiddleware_1.authMiddleware, UserController.findCustomer);
+router.put("/:_id", authMiddleware_1.authMiddleware, UserController.modifyUser);
+router.delete("/:_id", authMiddleware_1.authMiddleware, UserController.deleteUser);
 exports.default = router;
 //# sourceMappingURL=routers.js.map

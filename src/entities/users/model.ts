@@ -1,19 +1,20 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { ulid } from "ulid";
+// import { ulid } from "ulid";
+// import passwordValidator from "password-validator";
 
 export interface UserExtendedDocument extends Document {
   name: string;
   surname: string;
   email: string;
   phone: number;
-  id: number;
-}
-
+  password: string;
+  role: string;
+  }
 const UserExtendedSchema = new Schema(
-  {
-    _id: { type: String, default: ulid },
+  { 
     name: String,
     surname: String,
+  
     email: {
       type: String,
       required: true,
@@ -23,7 +24,19 @@ const UserExtendedSchema = new Schema(
       type: Number,
       unique: true,
     },
-    id: Number,
+    password: {
+      type: String,
+      select:false,
+      required: true
+    },
+    role: {
+      type: String,
+      enum: ['customer', 'tattooArtist', 'admin'],
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     versionKey: false,
@@ -31,7 +44,11 @@ const UserExtendedSchema = new Schema(
   }
 );
 
+
 export const userExtendedModel = mongoose.model<UserExtendedDocument>(
   "Users",
   UserExtendedSchema
 );
+
+export default UserExtendedSchema;
+

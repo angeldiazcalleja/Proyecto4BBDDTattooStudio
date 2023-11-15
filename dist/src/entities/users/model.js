@@ -25,20 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userExtendedModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
-const ulid_1 = require("ulid");
-// const isPasswordValid = (value: string) => {
-//   const passwordSchema = new passwordValidator();
-//   passwordSchema
-//     .is()
-//     .min(8) 
-//     .max(12) 
-//     .has()
-//     .uppercase() 
-//     .digits(1) 
-//     .symbols(1); 
-//   return passwordSchema.validate(value);
-// }
-const UserExtendedSchema = new mongoose_1.Schema({ _id: { type: String, default: ulid_1.ulid },
+const UserExtendedSchema = new mongoose_1.Schema({
     name: String,
     surname: String,
     email: {
@@ -54,29 +41,19 @@ const UserExtendedSchema = new mongoose_1.Schema({ _id: { type: String, default:
         type: String,
         select: false,
         required: true
-        // validate: {
-        //   validator: isPasswordValid,
-        //   message: "La contraseña no cumple con los requisitos",
-        // }
     },
     role: {
         type: String,
         enum: ['customer', 'tattooArtist', 'admin'],
-        default: 'customer',
     },
-    // id: String,
     isDeleted: {
         type: Boolean,
         default: false,
     },
-    // tattooArtists: [{
-    //   type: Schema.Types.ObjectId,
-    //   ref: 'tattooArtist', 
-    // }]
 }, {
     versionKey: false,
     timestamps: true,
 });
-exports.default = UserExtendedSchema;
 exports.userExtendedModel = mongoose_1.default.model("Users", UserExtendedSchema);
+exports.default = UserExtendedSchema;
 //# sourceMappingURL=model.js.map
