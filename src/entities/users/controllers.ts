@@ -14,6 +14,9 @@ import { Types } from "mongoose";
 //REGISTER
 
 export const register = async (req: Request, res: Response) => {
+
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
+
   try {
     const { name, surname, email, phone, password, role } = req.body;
     const requestingUserRole = req.token?.role;
@@ -22,13 +25,19 @@ export const register = async (req: Request, res: Response) => {
       return handleBadRequest(res);
     }
 
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña no cumple con los requisitos.Debe tener entre 8 y 16 carácteres,una letra mayúscula, un dígito y un carácter especial',
+      });
+    }    
     const userFound = await userExtendedModel.findOne({ email });
 
     if (userFound) {
       return res.status(409).json({
         success: false,
         message: "Ya existe un usuario registrado con ese correo electrónico.",
-      });
+      });3
     }
 
     // Verificar si el usuario que realiza la solicitud es un administrador

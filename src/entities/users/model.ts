@@ -1,6 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-// import { ulid } from "ulid";
-// import passwordValidator from "password-validator";
 
 export interface UserExtendedDocument extends Document {
   name: string;

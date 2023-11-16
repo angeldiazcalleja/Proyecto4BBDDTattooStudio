@@ -21,11 +21,18 @@ const mongoose_1 = require("mongoose");
 //REGISTER
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
     try {
         const { name, surname, email, phone, password, role } = req.body;
         const requestingUserRole = (_a = req.token) === null || _a === void 0 ? void 0 : _a.role;
         if (!name || !surname || !email || !phone || !password || !role) {
             return (0, errorHandlers_1.handleBadRequest)(res);
+        }
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                success: false,
+                message: 'La contraseña no cumple con los requisitos.Debe tener entre 8 y 16 carácteres,una letra mayúscula, un dígito y un carácter especial',
+            });
         }
         const userFound = yield model_1.userExtendedModel.findOne({ email });
         if (userFound) {
@@ -33,6 +40,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 success: false,
                 message: "Ya existe un usuario registrado con ese correo electrónico.",
             });
+            3;
         }
         // Verificar si el usuario que realiza la solicitud es un administrador
         if (requestingUserRole !== 'admin') {
