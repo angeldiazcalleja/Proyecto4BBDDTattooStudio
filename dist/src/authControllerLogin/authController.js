@@ -18,7 +18,7 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const model_1 = require("../entities/users/model");
 const config_1 = __importDefault(require("../core/config"));
 const router = express_1.default.Router();
-router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
         const user = yield model_1.userExtendedModel.findOne({ email }).select("+password");

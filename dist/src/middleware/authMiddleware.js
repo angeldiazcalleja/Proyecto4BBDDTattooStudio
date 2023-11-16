@@ -17,12 +17,6 @@ const authMiddleware = (req, res, next) => {
         const token = req.headers.authorization.split(" ")[1]; // Extraer el token de la cabecera de autorización
         const tokenDecoded = jsonwebtoken_1.default.verify(token, config_1.default.SECRET); // Verificar si el token es válido
         req.token = tokenDecoded; // Almacenar la información del token en req.token para su uso posterior
-        // if (req.method === "GET" && req.originalUrl.includes("/users")) {
-        //   return res.status(403).json({
-        //     success: false,
-        //     message: "No tienes permisos para acceder a nuestra database.",
-        //   });
-        // }
         next();
     }
     catch (error) {

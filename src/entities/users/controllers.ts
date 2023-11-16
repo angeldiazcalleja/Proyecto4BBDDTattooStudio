@@ -1,5 +1,4 @@
-import { Request, Response, NextFunction } from "express";
-import mongoose from "mongoose";
+import { Request, Response} from "express";
 import { userExtendedModel } from "./model";
 import {
   handleBadRequest,

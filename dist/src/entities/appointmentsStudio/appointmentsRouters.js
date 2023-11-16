@@ -22,21 +22,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userExtendedModel = void 0;
-const mongoose_1 = __importStar(require("mongoose"));
-const UserExtendedSchema = new mongoose_1.Schema({
-    name: String,
-    surname: String,
-    email: { type: String, required: true, unique: true },
-    phone: { type: Number, unique: true },
-    password: { type: String, select: false, required: true },
-    role: { type: String, enum: ['customer', 'tattooArtist', 'admin'] },
-    isDeleted: { type: Boolean, default: false },
-}, {
-    versionKey: false,
-    timestamps: true,
-});
-exports.userExtendedModel = mongoose_1.default.model("Users", UserExtendedSchema);
-exports.default = UserExtendedSchema;
-//# sourceMappingURL=model.js.map
+const express_1 = __importDefault(require("express"));
+const AppointmentController = __importStar(require("./appointmentsController"));
+const router = express_1.default.Router();
+router.post("/", AppointmentController.createAppointment);
+exports.default = router;
+//# sourceMappingURL=appointmentsRouters.js.map

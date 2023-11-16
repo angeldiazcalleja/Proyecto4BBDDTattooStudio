@@ -7,8 +7,7 @@ import CONF from "../core/config";
 const router = express.Router();
 
 router.post("/login", async (req: Request,
-  res: Response,
-  next: NextFunction) => {
+  res: Response) => {
   
 
   try {
