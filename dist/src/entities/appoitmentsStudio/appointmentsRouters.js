@@ -32,6 +32,7 @@ const authMiddleware_1 = require("../../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.post('/', authMiddleware_1.authMiddleware, AppointmentController.createAppointment);
 router.get('/', authMiddleware_1.authMiddleware, AppointmentController.getAppointments);
+router.put('/:_id', authMiddleware_1.authMiddleware, AppointmentController.updateAppointment);
 router.delete("/:_id", authMiddleware_1.authMiddleware, AppointmentController.deleteAppointment);
 exports.default = router;
 //# sourceMappingURL=appointmentsRouters.js.map

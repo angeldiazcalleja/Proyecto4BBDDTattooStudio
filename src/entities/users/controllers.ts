@@ -27,7 +27,7 @@ export const register = async (req: Request, res: Response) => {
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         success: false,
-        message: 'La contraseña no cumple con los requisitos.Debe tener entre 8 y 16 carácteres,una letra mayúscula, un dígito y un carácter especial',
+        message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
       });
     }    
     const userFound = await userExtendedModel.findOne({ email });
@@ -35,7 +35,7 @@ export const register = async (req: Request, res: Response) => {
     if (userFound) {
       return res.status(409).json({
         success: false,
-        message: "Ya existe un usuario registrado con ese correo electrónico.",
+        message: "There is already a registered user with that email address.",
       });3
     }
 
@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
       if (role !== 'customer' && role !== 'admin') {
         return res.status(403).json({
           success: false,
-          message: 'No tienes permisos para crear un usuario con el rol especificado.',
+          message: "You do not have permission to create a user with the specified role.",
         });
       }
     }
@@ -65,7 +65,7 @@ export const register = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       success: true,
-      message: "Usuario registrado con éxito",
+      message: "User registered successfully.",
       userRegistered: result.toObject(),
     });
   } catch (error) {
@@ -152,7 +152,7 @@ export const modifyUser = async (req: Request, res: Response) => {
     const user = await userExtendedModel.findOne({ _id: new Types.ObjectId(_id) });
 
     // Verificar permisos para modificar
-    const unauthorizedMessage = 'No tienes permisos para modificar esta cuenta.';
+    const unauthorizedMessage = "You do not have permission to modify this account.";
     if (!user || (roleIdFromToken === 'customer' && userIdFromToken !== user._id.toString()) || (roleIdFromToken !== 'admin' && userIdFromToken !== user._id.toString())) {
       return res.status(403).json({
         success: false,
@@ -197,7 +197,7 @@ export const deleteUser = async (req: Request, res: Response) => {
     ) {
       return res.status(403).json({
         success: false,
-        message: "No tienes permisos para eliminar esta cuenta.",
+        message: "You do not have permission to delete this account.",
       });
     }
 

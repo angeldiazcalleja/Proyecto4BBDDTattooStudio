@@ -1,27 +1,3 @@
-// import mongoose, { Schema } from "mongoose";
-
-// const appointmentsExtendedSchema = new Schema(
-// {
-
-//     clientId:{Number, maxlength:24},
-//     tattooArtistId:{Number, maxlength:24},
-//     date: Date,
-//     startTime: {type: Date,required: true},
-//     endTime: {type: Date,required: true},
-//     role: {type: String,enum: ['tattoo', 'piercing', 'laserTattoo']},
-//     price: {Number, maxlength:6},
-//     phoneClient: {Number, maxlength:9},
-//     comments:{String,  maxlength: 150}
-
-// })
-
-// export const appointmentsExtendedModel = mongoose.model(
-//     "Appointments",
-//     appointmentsExtendedSchema
-//   );
-  
-//   export default appointmentsExtendedSchema;
-
 import mongoose, { Schema, Types } from "mongoose";
 
 const appointmentsExtendedSchema = new Schema(

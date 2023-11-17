@@ -30,16 +30,15 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 res.json({ token });
             }
             else {
-                res.status(401).json({ error: "Credenciales inválidas" });
+                res.status(401).json({ error: "Invalid credentials" });
             }
         }
         else {
-            res.status(404).json({ error: "Usuario no encontrado" });
+            res.status(404).json({ error: "User not found" });
         }
     }
     catch (error) {
-        console.error("Error en el servidorr:", error);
-        res.status(500).json({ error: "Error en el servidorr" });
+        res.status(500).json({ error: "Server error" });
     }
 }));
 exports.default = router;

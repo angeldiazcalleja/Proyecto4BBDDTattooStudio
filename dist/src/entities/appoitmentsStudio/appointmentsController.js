@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAppointment = exports.getAppointments = exports.createAppointment = void 0;
+exports.deleteAppointment = exports.updateAppointment = exports.getAppointments = exports.createAppointment = void 0;
 const appointmentsModel_1 = require("./appointmentsModel");
 const model_1 = require("../users/model");
 const errorHandlers_1 = require("../../core/errorHandlers");
@@ -20,13 +20,13 @@ const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (userRole === 'customer' && userId !== customerId) {
             return res.status(403).json({
                 success: false,
-                message: 'No tienes permisos para crear citas para otros clientes.',
+                message: "You don't have permission to create appointments for other customers.",
             });
         }
         if (userRole === 'tattooArtist' && userId !== tattooArtistId) {
             return res.status(403).json({
                 success: false,
-                message: 'No tienes permisos para crear citas para otros artistas.',
+                message: "You don't have permission to create appointments for other tattooArtists.",
             });
         }
         const appointmentFound = yield appointmentsModel_1.appointmentsExtendedModel.findOne({ date, startTime });
@@ -109,7 +109,7 @@ const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function
         const appointments = yield appointmentsModel_1.appointmentsExtendedModel.find(query);
         return res.status(200).json({
             success: true,
-            message: 'Citas obtenidas correctamente.',
+            message: "Appointments retrieved successfully.",
             appointments: appointments.map((appointment) => appointment.toObject()),
         });
     }
@@ -119,6 +119,69 @@ const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getAppointments = getAppointments;
+const updateAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { _id } = req.params; // Obtener el ID de la cita a modificar
+        const { role, _id: userId } = req.token; // Obtener el rol y el ID del usuario desde el token
+        const { date, startTime, endTime, price, comments } = req.body;
+        const appointment = yield appointmentsModel_1.appointmentsExtendedModel.findById(_id);
+        if (!appointment) {
+            return (0, errorHandlers_1.handleNotFound)(res);
+        }
+        // Verificar permisos para modificar la cita
+        const unauthorizedMessage = "You do not have permission to modify this appointment.";
+        if (role === 'customer' && appointment.customerId.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: unauthorizedMessage,
+            });
+        }
+        if (role === 'tattooArtist' && appointment.tattooArtistId.toString() !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: unauthorizedMessage,
+            });
+        }
+        // Verificar si la nueva fecha y hora coinciden con otra cita existente
+        const conflictingAppointment = yield appointmentsModel_1.appointmentsExtendedModel.findOne({
+            _id: { $ne: _id },
+            date,
+            $or: [
+                {
+                    $and: [
+                        { startTime: { $lt: endTime } },
+                        { endTime: { $gt: startTime } },
+                    ],
+                },
+                {
+                    $and: [
+                        { startTime: { $lt: endTime } },
+                        { endTime: { $gt: startTime } },
+                    ]
+                },
+            ],
+        });
+        if (conflictingAppointment) {
+            return res.status(400).json({
+                success: false,
+                message: "The new date and time coincide with another existing appointment for this customer or tattoo artist.",
+            });
+        }
+        // Modificar la cita
+        const result = yield appointmentsModel_1.appointmentsExtendedModel.findByIdAndUpdate(_id, { $set: { date, startTime, endTime, price, comments } }, { new: true });
+        return result
+            ? res.status(200).json({
+                success: true,
+                message: "Appointment successfully modified.",
+                updatedAppointment: result.toObject(),
+            })
+            : (0, errorHandlers_1.handleNotFound)(res);
+    }
+    catch (error) {
+        return (0, errorHandlers_1.handleServerError)(res);
+    }
+});
+exports.updateAppointment = updateAppointment;
 const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { _id } = req.params; // Obtener el ID de la cita a eliminar
@@ -127,7 +190,7 @@ const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!appointment) {
             return (0, errorHandlers_1.handleNotFound)(res);
         }
-        const unauthorizedMessage = 'No tienes permisos para eliminar esta cita.';
+        const unauthorizedMessage = "You do not have permission to delete this appointment.";
         if (role === 'customer' && appointment.customerId.toString() !== userId) {
             return res.status(403).json({
                 success: false,
@@ -144,7 +207,7 @@ const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return result
             ? res.status(200).json({
                 success: true,
-                message: 'Cita eliminada correctamente.',
+                message: "Appointment deleted successfully.",
                 deletedAppointment: result.toObject(),
             })
             : (0, errorHandlers_1.handleNotFound)(res);
