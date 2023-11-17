@@ -4,7 +4,8 @@ import { authMiddleware } from "../../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/", AppointmentController.createAppointment);
+router.post('/', authMiddleware, AppointmentController.createAppointment);
+router.get('/', authMiddleware, AppointmentController.getAppointments);
 router.delete("/:_id", authMiddleware, AppointmentController.deleteAppointment)
 
 

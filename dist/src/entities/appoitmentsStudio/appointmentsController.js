@@ -9,16 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAppointment = exports.createAppointment = void 0;
+exports.deleteAppointment = exports.getAppointments = exports.createAppointment = void 0;
 const appointmentsModel_1 = require("./appointmentsModel");
 const model_1 = require("../users/model");
 const errorHandlers_1 = require("../../core/errorHandlers");
 const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { customerId, tattooArtistId, date, startTime, endTime, role, price, comments } = req.body;
+        const { role: userRole, _id: userId } = req.token;
+        if (userRole === 'customer' && userId !== customerId) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permisos para crear citas para otros clientes.',
+            });
+        }
+        if (userRole === 'tattooArtist' && userId !== tattooArtistId) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permisos para crear citas para otros artistas.',
+            });
+        }
         const appointmentFound = yield appointmentsModel_1.appointmentsExtendedModel.findOne({ date, startTime });
         if (appointmentFound) {
-            return res.status(200).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Invalid date and time. Appointment already exists.',
             });
@@ -80,21 +93,42 @@ exports.createAppointment = createAppointment;
 //     message: 'Invalid date and time. Tattoo artist already has another appointment.',
 //   });
 // }
+const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { role, _id: userId } = req.token;
+        let query;
+        if (role === 'customer') {
+            query = { customerId: userId };
+        }
+        else if (role === 'tattooArtist') {
+            query = { tattooArtistId: userId };
+        }
+        else {
+            query = {};
+        }
+        const appointments = yield appointmentsModel_1.appointmentsExtendedModel.find(query);
+        return res.status(200).json({
+            success: true,
+            message: 'Citas obtenidas correctamente.',
+            appointments: appointments.map((appointment) => appointment.toObject()),
+        });
+    }
+    catch (error) {
+        console.error('Error:', error);
+        return (0, errorHandlers_1.handleServerError)(res);
+    }
+});
+exports.getAppointments = getAppointments;
 const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { _id } = req.params; // Obtener el ID de la cita a eliminar
         const { role, _id: userId } = req.token; // Obtener el rol y el ID del usuario desde el token
         const appointment = yield appointmentsModel_1.appointmentsExtendedModel.findById(_id);
-        console.log("Appointment Details:", appointment.toObject());
-        console.log('Role:', role);
-        console.log('Customer ID from Appointment:', appointment.customerId.toString());
-        console.log('User ID from Token:', userId);
         if (!appointment) {
             return (0, errorHandlers_1.handleNotFound)(res);
         }
         const unauthorizedMessage = 'No tienes permisos para eliminar esta cita.';
         if (role === 'customer' && appointment.customerId.toString() !== userId) {
-            console.log("Permisos no cumplidos");
             return res.status(403).json({
                 success: false,
                 message: unauthorizedMessage,
@@ -106,7 +140,6 @@ const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 message: unauthorizedMessage,
             });
         }
-        // Eliminar la cita de manera lógica (marcar como eliminada)
         const result = yield appointmentsModel_1.appointmentsExtendedModel.findByIdAndUpdate(_id, { $set: { isDeleted: true } }, { new: true });
         return result
             ? res.status(200).json({

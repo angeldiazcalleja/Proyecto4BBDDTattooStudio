@@ -7,10 +7,26 @@ export const createAppointment = async (req: Request, res: Response) => {
   try {
     const { customerId, tattooArtistId, date, startTime, endTime, role, price, comments } = req.body;
 
+
+    const { role: userRole, _id: userId } = req.token;
+    if (userRole === 'customer' && userId !== customerId) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tienes permisos para crear citas para otros clientes.',
+      });
+    }
+
+    if (userRole === 'tattooArtist' && userId !== tattooArtistId) {
+      return res.status(403).json({
+        success: false,
+        message: 'No tienes permisos para crear citas para otros artistas.',
+      });
+    }
+
     const appointmentFound = await appointmentsExtendedModel.findOne({ date, startTime });
 
     if (appointmentFound) {
-      return res.status(200).json({
+      return res.status(400).json({
         success: false,
         message: 'Invalid date and time. Appointment already exists.',
       });
@@ -44,7 +60,6 @@ export const createAppointment = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
-
 
 
 // // Verificar si ya hay una cita para el cliente en ese período
@@ -82,25 +97,47 @@ export const createAppointment = async (req: Request, res: Response) => {
 // }
 
 
+export const getAppointments = async (req: Request, res: Response) => {
+  try {
+    const { role, _id: userId } = req.token;
+
+    let query;
+    if (role === 'customer') {
+      query = { customerId: userId };
+    } else if (role === 'tattooArtist') {
+      query = { tattooArtistId: userId };
+    } else {
+      query = {};
+    }
+
+    const appointments = await appointmentsExtendedModel.find(query);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Citas obtenidas correctamente.',
+      appointments: appointments.map((appointment) => appointment.toObject()),
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    return handleServerError(res);
+  }
+};
+
+
+
 export const deleteAppointment = async (req: Request, res: Response) => {
   try {
     const { _id } = req.params; // Obtener el ID de la cita a eliminar
     const { role, _id: userId } = req.token; // Obtener el rol y el ID del usuario desde el token
 
     const appointment = await appointmentsExtendedModel.findById(_id);
-    console.log("Appointment Details:", appointment.toObject());
-    console.log('Role:', role);
-    console.log('Customer ID from Appointment:', appointment.customerId.toString());
-    console.log('User ID from Token:', userId);
-
-
+ 
     if (!appointment) {
       return handleNotFound(res);
     }
     
     const unauthorizedMessage = 'No tienes permisos para eliminar esta cita.';
     if (role === 'customer' && appointment.customerId.toString() !== userId) {
-      console.log("Permisos no cumplidos");
       return res.status(403).json({
         success: false,
         message: unauthorizedMessage,
@@ -113,7 +150,7 @@ export const deleteAppointment = async (req: Request, res: Response) => {
         message: unauthorizedMessage,
       });
     }
-    // Eliminar la cita de manera lógica (marcar como eliminada)
+
     const result = await appointmentsExtendedModel.findByIdAndUpdate(
       _id,
       { $set: { isDeleted: true } },

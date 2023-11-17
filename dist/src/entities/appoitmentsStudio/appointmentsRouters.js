@@ -30,7 +30,8 @@ const express_1 = __importDefault(require("express"));
 const AppointmentController = __importStar(require("./appointmentsController"));
 const authMiddleware_1 = require("../../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/", AppointmentController.createAppointment);
+router.post('/', authMiddleware_1.authMiddleware, AppointmentController.createAppointment);
+router.get('/', authMiddleware_1.authMiddleware, AppointmentController.getAppointments);
 router.delete("/:_id", authMiddleware_1.authMiddleware, AppointmentController.deleteAppointment);
 exports.default = router;
 //# sourceMappingURL=appointmentsRouters.js.map
