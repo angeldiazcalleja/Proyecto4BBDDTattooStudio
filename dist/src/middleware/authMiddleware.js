@@ -20,7 +20,6 @@ const authMiddleware = (req, res, next) => {
         next();
     }
     catch (error) {
-        console.log("Error in the middleware:", error.message);
         return res.status(401).json({
             success: false,
             message: "Unauthorized: Invalid token.",

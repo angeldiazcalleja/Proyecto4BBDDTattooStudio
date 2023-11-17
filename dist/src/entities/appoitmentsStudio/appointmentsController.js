@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAppointment = exports.updateAppointment = exports.getAppointments = exports.createAppointment = void 0;
+exports.deleteAppointment = exports.updateAppointment = exports.getAppointmentById = exports.getAppointments = exports.createAppointment = void 0;
 const appointmentsModel_1 = require("./appointmentsModel");
 const model_1 = require("../users/model");
 const errorHandlers_1 = require("../../core/errorHandlers");
@@ -119,6 +119,35 @@ const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getAppointments = getAppointments;
+const getAppointmentById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { role, _id: userId } = req.token;
+        const { _id: appointmentId } = req.params;
+        let query;
+        if (role === 'customer') {
+            query = { customerId: userId, _id: appointmentId };
+        }
+        else if (role === 'tattooArtist') {
+            query = { tattooArtistId: userId, _id: appointmentId };
+        }
+        else {
+            query = { _id: appointmentId };
+        }
+        const appointment = yield appointmentsModel_1.appointmentsExtendedModel.findOne(query);
+        if (!appointment) {
+            return (0, errorHandlers_1.handleNotFound)(res);
+        }
+        return res.status(200).json({
+            success: true,
+            message: 'Appointment retrieved successfully.',
+            appointment: appointment.toObject(),
+        });
+    }
+    catch (error) {
+        return (0, errorHandlers_1.handleServerError)(res);
+    }
+});
+exports.getAppointmentById = getAppointmentById;
 const updateAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { _id } = req.params; // Obtener el ID de la cita a modificar

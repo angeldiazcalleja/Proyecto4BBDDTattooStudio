@@ -144,7 +144,7 @@ export const findCustomer = async (req: Request, res: Response) => {
 export const modifyUser = async (req: Request, res: Response) => {
   try {
     const { _id } = req.params;
-    const { name, surname, email, phone, role } = req.body;
+    const { name, surname, email, phone, role, password } = req.body;
     const userIdFromToken = req.token?._id;
     const roleIdFromToken = req.token?.role;
 
@@ -165,6 +165,11 @@ export const modifyUser = async (req: Request, res: Response) => {
     if (surname) user.surname = surname;
     if (email) user.email = email;
     if (phone) user.phone = phone;
+
+    if (password) {
+      const hashedPassword = bcrypt.hashSync(password, CONF.HASH_ROUNDS);
+      user.password = hashedPassword;
+    }
 
     // Actualizar el campo 'role' solo si es un administrador
     if (roleIdFromToken === 'admin' && role) {

@@ -142,7 +142,7 @@ const modifyUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     var _e, _f;
     try {
         const { _id } = req.params;
-        const { name, surname, email, phone, role } = req.body;
+        const { name, surname, email, phone, role, password } = req.body;
         const userIdFromToken = (_e = req.token) === null || _e === void 0 ? void 0 : _e._id;
         const roleIdFromToken = (_f = req.token) === null || _f === void 0 ? void 0 : _f.role;
         // Obtener el usuario de la base de datos
@@ -164,6 +164,10 @@ const modifyUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             user.email = email;
         if (phone)
             user.phone = phone;
+        if (password) {
+            const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
+            user.password = hashedPassword;
+        }
         // Actualizar el campo 'role' solo si es un administrador
         if (roleIdFromToken === 'admin' && role) {
             user.role = role;

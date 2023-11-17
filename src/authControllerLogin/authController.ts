@@ -9,7 +9,6 @@ const router = express.Router();
 router.post("/login", async (req: Request,
   res: Response) => {
   
-
   try {
     const { email, password } = req.body;
     const user = await userExtendedModel.findOne({ email }).select("+password")

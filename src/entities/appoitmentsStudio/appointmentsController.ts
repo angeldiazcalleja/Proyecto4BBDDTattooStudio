@@ -123,6 +123,35 @@ export const getAppointments = async (req: Request, res: Response) => {
   }
 };
 
+export const getAppointmentById = async (req: Request, res: Response) => {
+  try {
+    const { role, _id: userId } = req.token;
+    const { _id: appointmentId } = req.params;
+
+    let query;
+    if (role === 'customer') {
+      query = { customerId: userId, _id: appointmentId };
+    } else if (role === 'tattooArtist') {
+      query = { tattooArtistId: userId, _id: appointmentId };
+    } else {
+      query = { _id: appointmentId };
+    }
+
+    const appointment = await appointmentsExtendedModel.findOne(query);
+
+    if (!appointment) {
+      return handleNotFound(res);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Appointment retrieved successfully.',
+      appointment: appointment.toObject(),
+    });
+  } catch (error) {
+    return handleServerError(res);
+  }
+};
 
 
 export const updateAppointment = async (req: Request, res: Response) => {
