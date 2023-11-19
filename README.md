@@ -1,6 +1,6 @@
 # GeeksHubs <img src= "assets/geek-logo.png" width="100"> 
 
-<a>Proyecto 3- BBDD TattooStudio Skin Factory.</a>
+<a>Proyecto 4- BBDD TattooStudio Skin Factory.</a>
 
 ## Tabla de contenidos
 

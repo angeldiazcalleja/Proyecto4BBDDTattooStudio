@@ -53,12 +53,7 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = bcrypt.hashSync(password, CONF.HASH_ROUNDS);
 
     const newUser = new userExtendedModel({
-      name,
-      surname,
-      email,
-      phone,
-      password: hashedPassword,
-      role,
+      name,surname,email,phone,password: hashedPassword,role,
     });
 
     const result = await newUser.save();

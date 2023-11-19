@@ -7,7 +7,6 @@ export const createAppointment = async (req: Request, res: Response) => {
   try {
     const { customerId, tattooArtistId, date, startTime, endTime, role, price, comments } = req.body;
 
-
     const { role: userRole, _id: userId } = req.token;
     if (userRole === 'customer' && userId !== customerId) {
       return res.status(403).json({
@@ -22,13 +21,37 @@ export const createAppointment = async (req: Request, res: Response) => {
         message: "You don't have permission to create appointments for other tattooArtists.",
       });
     }
+    // Verificar si ya hay una cita para el cliente en ese período
+    const customerAppointmentFound = await appointmentsExtendedModel.findOne({
+      customerId,
+      date,
+      $or: [
+        { $and: [{ startTime: { $gte: startTime } }, { startTime: { $lt: endTime } }] },
+        { $and: [{ endTime: { $gt: startTime } }, { endTime: { $lte: endTime } }] },
+      ],
+    });
 
-    const appointmentFound = await appointmentsExtendedModel.findOne({ date, startTime });
-
-    if (appointmentFound) {
-      return res.status(400).json({
+    if (customerAppointmentFound) {
+      return res.status(200).json({
         success: false,
-        message: 'Invalid date and time. Appointment already exists.',
+        message: 'Invalid date and time. Customer already has another appointment.',
+      });
+    }
+
+    // Verificar si ya hay una cita para el tatuador en ese período
+    const tattooArtistAppointmentFound = await appointmentsExtendedModel.findOne({
+      tattooArtistId,
+      date,
+      $or: [
+        { $and: [{ startTime: { $gte: startTime } }, { startTime: { $lt: endTime } }] },
+        { $and: [{ endTime: { $gt: startTime } }, { endTime: { $lte: endTime } }] },
+      ],
+    });
+
+    if (tattooArtistAppointmentFound) {
+      return res.status(200).json({
+        success: false,
+        message: 'Invalid date and time. Tattoo artist already has another appointment.',
       });
     }
 
@@ -60,42 +83,6 @@ export const createAppointment = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
-
-
-// // Verificar si ya hay una cita para el cliente en ese período
-// const customerAppointmentFound = await appointmentsExtendedModel.findOne({
-//   customerId,
-//   date,
-//   $or: [
-//     { $and: [{ startTime: { $gte: startTime } }, { startTime: { $lt: endTime } }] },
-//     { $and: [{ endTime: { $gt: startTime } }, { endTime: { $lte: endTime } }] },
-//   ],
-// });
-
-// if (customerAppointmentFound) {
-//   return res.status(200).json({
-//     success: false,
-//     message: 'Invalid date and time. Customer already has another appointment.',
-//   });
-// }
-
-// // Verificar si ya hay una cita para el tatuador en ese período
-// const tattooArtistAppointmentFound = await appointmentsExtendedModel.findOne({
-//   tattooArtistId,
-//   date,
-//   $or: [
-//     { $and: [{ startTime: { $gte: startTime } }, { startTime: { $lt: endTime } }] },
-//     { $and: [{ endTime: { $gt: startTime } }, { endTime: { $lte: endTime } }] },
-//   ],
-// });
-
-// if (tattooArtistAppointmentFound) {
-//   return res.status(200).json({
-//     success: false,
-//     message: 'Invalid date and time. Tattoo artist already has another appointment.',
-//   });
-// }
-
 
 export const getAppointments = async (req: Request, res: Response) => {
   try {

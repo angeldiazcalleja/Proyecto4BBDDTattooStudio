@@ -11,7 +11,6 @@ const authController_1 = __importDefault(require("./src/authControllerLogin/auth
 const cors_1 = __importDefault(require("cors"));
 const config_1 = __importDefault(require("./src/core/config"));
 const app = (0, express_1.default)();
-const port = 3000;
 app.use(express_1.default.json());
 const { PORT, DB_URL } = config_1.default;
 mongoose_1.default

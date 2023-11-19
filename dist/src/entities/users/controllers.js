@@ -54,12 +54,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
         const newUser = new model_1.userExtendedModel({
-            name,
-            surname,
-            email,
-            phone,
-            password: hashedPassword,
-            role,
+            name, surname, email, phone, password: hashedPassword, role,
         });
         const result = yield newUser.save();
         return res.status(200).json({
