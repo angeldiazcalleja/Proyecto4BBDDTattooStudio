@@ -12,10 +12,10 @@ import { Types } from "mongoose";
 
 //REGISTER
 
-
 export const register = async (req: Request, res: Response) => {
-
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
 
   try {
     const { name, surname, email, phone, password, role } = req.body;
@@ -30,7 +30,14 @@ export const register = async (req: Request, res: Response) => {
         success: false,
         message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
       });
-    }    
+    }
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email address format.",
+      });
+    }
 
     const userFound = await userExtendedModel.findOne({ email });
 
@@ -71,7 +78,6 @@ export const register = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
-
 
 //ENCONTRAR USUARIOS
 

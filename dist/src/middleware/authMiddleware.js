@@ -14,7 +14,7 @@ const authMiddleware = (req, res, next) => {
                 message: "Unauthorized: Token missing.",
             });
         }
-        const token = req.headers.authorization.split(" ")[1]; // Extraer el token de la cabecera de autorización
+        const token = req.headers.authorization.split(" ")[1]; // Extraer el token de la cabecera de autorización. Bearer-Token. Se queda con el Token.
         const tokenDecoded = jsonwebtoken_1.default.verify(token, config_1.default.SECRET); // Verificar si el token es válido
         req.token = tokenDecoded; // Almacenar la información del token en req.token para su uso posterior
         next();

@@ -16,6 +16,14 @@ const errorHandlers_1 = require("../../core/errorHandlers");
 const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { customerId, tattooArtistId, date, startTime, endTime, role, price, comments } = req.body;
+        // Validación para asegurarse de que la fecha sea en el futuro
+        const currentDate = new Date();
+        if (new Date(date) < currentDate) {
+            return res.status(200).json({
+                success: false,
+                message: 'Invalid date. Please choose a date in the future.',
+            });
+        }
         const { role: userRole, _id: userId } = req.token;
         if (userRole === 'customer' && userId !== customerId) {
             return res.status(403).json({

@@ -7,7 +7,17 @@ export const createAppointment = async (req: Request, res: Response) => {
   try {
     const { customerId, tattooArtistId, date, startTime, endTime, role, price, comments } = req.body;
 
+    // Validación para asegurarse de que la fecha sea en el futuro
+    const currentDate = new Date();
+    if (new Date(date) < currentDate) {
+      return res.status(200).json({
+        success: false,
+        message: 'Invalid date. Please choose a date in the future.',
+      });
+    }
+
     const { role: userRole, _id: userId } = req.token;
+    
     if (userRole === 'customer' && userId !== customerId) {
       return res.status(403).json({
         success: false,
@@ -21,6 +31,7 @@ export const createAppointment = async (req: Request, res: Response) => {
         message: "You don't have permission to create appointments for other tattooArtists.",
       });
     }
+
     // Verificar si ya hay una cita para el cliente en ese período
     const customerAppointmentFound = await appointmentsExtendedModel.findOne({
       customerId,
@@ -82,6 +93,11 @@ export const createAppointment = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
+
+
+ 
+
+
 
 export const getAppointments = async (req: Request, res: Response) => {
   try {

@@ -22,6 +22,7 @@ const mongoose_1 = require("mongoose");
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     try {
         const { name, surname, email, phone, password, role } = req.body;
         const requestingUserRole = (_a = req.token) === null || _a === void 0 ? void 0 : _a.role;
@@ -32,6 +33,12 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(400).json({
                 success: false,
                 message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
+            });
+        }
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email address format.",
             });
         }
         const userFound = yield model_1.userExtendedModel.findOne({ email });
