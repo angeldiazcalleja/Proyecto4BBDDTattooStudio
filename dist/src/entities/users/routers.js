@@ -30,7 +30,7 @@ const express_1 = __importDefault(require("express"));
 const UserController = __importStar(require("./controllers"));
 const authMiddleware_1 = require("../../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/", UserController.register);
+router.post("/", authMiddleware_1.authMiddleware, UserController.register);
 router.get("/", authMiddleware_1.authMiddleware, UserController.findUsers);
 router.get("/:_id", authMiddleware_1.authMiddleware, UserController.findCustomer);
 router.put("/:_id", authMiddleware_1.authMiddleware, UserController.modifyUser);

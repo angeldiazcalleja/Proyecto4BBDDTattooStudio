@@ -12,6 +12,7 @@ import { Types } from "mongoose";
 
 //REGISTER
 
+
 export const register = async (req: Request, res: Response) => {
 
   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
@@ -30,17 +31,19 @@ export const register = async (req: Request, res: Response) => {
         message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
       });
     }    
+
     const userFound = await userExtendedModel.findOne({ email });
 
     if (userFound) {
       return res.status(409).json({
         success: false,
         message: "There is already a registered user with that email address.",
-      });3
+      });
     }
 
     // Verificar si el usuario que realiza la solicitud es un administrador
     if (requestingUserRole !== 'admin') {
+   
       // Si no es administrador, solo puede crear usuarios con los roles 'customer' o 'admin'
       if (role !== 'customer' && role !== 'admin') {
         return res.status(403).json({
@@ -53,7 +56,7 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = bcrypt.hashSync(password, CONF.HASH_ROUNDS);
 
     const newUser = new userExtendedModel({
-      name,surname,email,phone,password: hashedPassword,role,
+      name, surname, email, phone, password: hashedPassword, role,
     });
 
     const result = await newUser.save();
@@ -68,6 +71,7 @@ export const register = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
+
 
 //ENCONTRAR USUARIOS
 
@@ -119,12 +123,10 @@ export const findCustomer = async (req: Request, res: Response) => {
     });
 
     if (user) {
-      if (requestingUserRole === "customer" && user._id.toString() !== requestingUserId) {
-        return handleUnauthorized(res);
-      } else if (requestingUserRole === "admin") {
+      if (requestingUserRole === "admin" || (requestingUserRole === "customer" && user._id.toString() === requestingUserId)) {
         return res.status(200).json(user);
       } else {
-        return handleNotFound(res);
+        return handleUnauthorized(res);
       }
     } else {
       return handleNotFound(res);
@@ -133,6 +135,7 @@ export const findCustomer = async (req: Request, res: Response) => {
     return handleServerError(res);
   }
 };
+
 
 //MODIFICAR 
 

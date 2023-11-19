@@ -40,7 +40,6 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 success: false,
                 message: "There is already a registered user with that email address.",
             });
-            3;
         }
         // Verificar si el usuario que realiza la solicitud es un administrador
         if (requestingUserRole !== 'admin') {
@@ -113,14 +112,11 @@ const findCustomer = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             isDeleted: false,
         });
         if (user) {
-            if (requestingUserRole === "customer" && user._id.toString() !== requestingUserId) {
-                return (0, errorHandlers_1.handleUnauthorized)(res);
-            }
-            else if (requestingUserRole === "admin") {
+            if (requestingUserRole === "admin" || (requestingUserRole === "customer" && user._id.toString() === requestingUserId)) {
                 return res.status(200).json(user);
             }
             else {
-                return (0, errorHandlers_1.handleNotFound)(res);
+                return (0, errorHandlers_1.handleUnauthorized)(res);
             }
         }
         else {

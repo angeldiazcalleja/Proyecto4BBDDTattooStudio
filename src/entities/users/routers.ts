@@ -4,7 +4,7 @@ import { authMiddleware } from "../../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/", UserController.register);
+router.post("/", authMiddleware, UserController.register);
 router.get("/", authMiddleware, UserController.findUsers);
 router.get("/:_id", authMiddleware, UserController.findCustomer);
 router.put("/:_id", authMiddleware, UserController.modifyUser);

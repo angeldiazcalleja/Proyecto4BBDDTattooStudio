@@ -81,7 +81,6 @@ const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     catch (error) {
-        console.error('Error:', error);
         return (0, errorHandlers_1.handleServerError)(res);
     }
 });
@@ -107,7 +106,6 @@ const getAppointments = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
     }
     catch (error) {
-        console.error('Error:', error);
         return (0, errorHandlers_1.handleServerError)(res);
     }
 });
@@ -206,8 +204,8 @@ const updateAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
 exports.updateAppointment = updateAppointment;
 const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { _id } = req.params; // Obtener el ID de la cita a eliminar
-        const { role, _id: userId } = req.token; // Obtener el rol y el ID del usuario desde el token
+        const { _id } = req.params;
+        const { role, _id: userId } = req.token;
         const appointment = yield appointmentsModel_1.appointmentsExtendedModel.findById(_id);
         if (!appointment) {
             return (0, errorHandlers_1.handleNotFound)(res);
@@ -219,7 +217,7 @@ const deleteAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 message: unauthorizedMessage,
             });
         }
-        if (role !== 'admin') {
+        if (role !== 'admin' && !(role === 'customer' && appointment.customerId.toString() === userId)) {
             return res.status(403).json({
                 success: false,
                 message: unauthorizedMessage,

@@ -79,7 +79,6 @@ export const createAppointment = async (req: Request, res: Response) => {
       newAppointment: savedAppointment.toObject(),
     });
   } catch (error) {
-    console.error('Error:', error);
     return handleServerError(res);
   }
 };
@@ -105,7 +104,6 @@ export const getAppointments = async (req: Request, res: Response) => {
       appointments: appointments.map((appointment) => appointment.toObject()),
     });
   } catch (error) {
-    console.error('Error:', error);
     return handleServerError(res);
   }
 };
@@ -216,16 +214,16 @@ export const updateAppointment = async (req: Request, res: Response) => {
 
 export const deleteAppointment = async (req: Request, res: Response) => {
   try {
-    const { _id } = req.params; // Obtener el ID de la cita a eliminar
-    const { role, _id: userId } = req.token; // Obtener el rol y el ID del usuario desde el token
-
+    const { _id } = req.params;
+    const { role, _id: userId } = req.token;
     const appointment = await appointmentsExtendedModel.findById(_id);
- 
+
     if (!appointment) {
-      return handleNotFound(res);
+    return handleNotFound(res);
     }
-    
+
     const unauthorizedMessage = "You do not have permission to delete this appointment.";
+
     if (role === 'customer' && appointment.customerId.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -233,7 +231,7 @@ export const deleteAppointment = async (req: Request, res: Response) => {
       });
     }
 
-    if (role !== 'admin') {
+    if (role !== 'admin' && !(role === 'customer' && appointment.customerId.toString() === userId)) {
       return res.status(403).json({
         success: false,
         message: unauthorizedMessage,
