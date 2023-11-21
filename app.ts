@@ -2,7 +2,6 @@ import express from "express";
 import mongoose from "mongoose";
 import userRouter from "./src/entities/users/routers";
 import appointmentRouter from "./src/entities/appoitmentsStudio/appointmentsRouters";
-import router from "./src/authControllerLogin/authController";
 import cors from "cors";
 import CONF from "./src/core/config";
 
@@ -20,7 +19,7 @@ mongoose
 
   app.use(cors());
   app.use("/users", userRouter);
-  app.use("/auth", router);
+  app.use("/auth", userRouter);
   app.use("/appointments", appointmentRouter)
   
 app.listen(PORT, () => {

@@ -33,7 +33,7 @@ const appointmentsExtendedSchema = new mongoose_1.Schema({
     date: Date,
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
-    role: { type: String, enum: ['tattoo', 'piercing', 'laserTattoo'] },
+    service: { type: String, enum: ["tattoo", "piercing", 'laserTattoo'] },
     price: { type: Number, maxlength: 6 },
     comments: { type: String, maxlength: 150 },
     isDeleted: { type: Boolean, default: false },

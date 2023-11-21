@@ -10,7 +10,6 @@ const authMiddleware = (req, res, next) => {
     try {
         if (!req.headers.authorization) {
             return res.status(401).json({
-                success: false,
                 message: "Unauthorized: Token missing.",
             });
         }
@@ -20,9 +19,7 @@ const authMiddleware = (req, res, next) => {
         next();
     }
     catch (error) {
-        console.error('Error in the middleware:', error.message);
         return res.status(401).json({
-            success: false,
             message: "Unauthorized: Invalid token.",
             error: error.message,
         });

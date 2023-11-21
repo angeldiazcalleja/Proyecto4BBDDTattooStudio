@@ -8,9 +8,9 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   try { 
+  
     if (!req.headers.authorization) {
       return res.status(401).json({
-        success: false,
         message: "Unauthorized: Token missing.",
       });
     }
@@ -21,9 +21,7 @@ export const authMiddleware = (
     req.token = tokenDecoded; // Almacenar la información del token en req.token para su uso posterior
     next();
   } catch (error) {
-    console.error('Error in the middleware:', error.message);
     return res.status(401).json({
-      success: false,
       message: "Unauthorized: Invalid token.",
       error: error.message,
     });
