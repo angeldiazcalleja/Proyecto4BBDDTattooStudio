@@ -33,7 +33,6 @@ Esta API gestiona citas para el estudio de tatuajes **SKIN FACTORY**. Permite a 
 
 1. Clona el repositorio: `git clone <url>`
 2. Instala las dependencias: `npm install`
-3. Configura las variables de entorno en un archivo `.env`
 
 ## Endpoints
 

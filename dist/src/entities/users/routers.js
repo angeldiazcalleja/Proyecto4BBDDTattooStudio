@@ -49,13 +49,24 @@ router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
     }
 }));
+// router.post("/", async (req: Request, res: Response) => {
+//   try {
+//     await UserController.register(req, res);
+//   } catch (error) {
+//     res.status(500).json({
+//       message: "Internal Server Error",
+//     });
+//   }
+// });
 router.post("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield UserController.register(req, res);
     }
     catch (error) {
+        console.error("Error in UserController.register:", error);
         res.status(500).json({
             message: "Internal Server Error",
+            error: error.message, // Devuelve el mensaje de error específico si está disponible
         });
     }
 }));

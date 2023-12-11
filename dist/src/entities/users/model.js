@@ -26,12 +26,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userExtendedModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const UserExtendedSchema = new mongoose_1.Schema({
-    name: { type: String, minlength: 3, maxlength: 15, required: true },
-    surname: { type: String, minlength: 3, maxlength: 15, required: true },
+    name: { type: String, minlength: 3, maxlength: 15 },
+    surname: { type: String, minlength: 3, maxlength: 15 },
     email: { type: String, required: true, unique: true },
-    phone: { type: Number, unique: true, required: true },
+    phone: { type: Number, unique: true, required: false },
     password: { type: String, select: false, required: true },
-    role: { type: String, enum: ['customer', 'tattooArtist', 'admin'], required: true },
+    role: { type: String, default: 'customer' },
     isDeleted: { type: Boolean, default: false },
 }, {
     versionKey: false,

@@ -25,7 +25,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const user = yield model_1.userExtendedModel.findOne({ email }).select("+password");
         if (user) {
             if (yield bcrypt_1.default.compare(password, user.password)) {
-                const token = jsonwebtoken_1.default.sign({ _id: user._id, email, role: user.role }, config_1.default.SECRET, {
+                const token = jsonwebtoken_1.default.sign({ name: user.name, phone: user.phone, _id: user._id, email, role: user.role }, config_1.default.SECRET, {
                     expiresIn: "24h",
                 });
                 res.json({ token });
@@ -47,14 +47,14 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const { name, surname, email, phone, password, role } = req.body;
+    const { name, surname, email, phone, password } = req.body;
     const requestingUserRole = (_a = req.token) === null || _a === void 0 ? void 0 : _a.role;
-    if (!name || !surname || !email || !phone || !password || !role) {
+    if (!email || !password) {
         return (0, errorHandlers_1.handleBadRequest)(res);
     }
     if (!passwordRegex.test(password)) {
         return res.status(400).json({
-            message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
+            message: "Password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
         });
     }
     if (!emailRegex.test(email)) {
@@ -65,61 +65,129 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userFound = yield model_1.userExtendedModel.findOne({ email });
     if (userFound) {
         return res.status(409).json({
-            message: "There is already a registered user with that email address.",
+            message: "A user is already registered with that email address.",
         });
     }
-    if (role === 'customer') {
-        const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
-        const newUser = new model_1.userExtendedModel({
-            name, surname, email, phone, password: hashedPassword, role,
-        });
-        const result = yield newUser.save();
-        return res.status(200).json({
-            message: "User registered successfully.",
-            userRegistered: result.toObject(),
-        });
-    }
-    else if (requestingUserRole === 'admin') {
-        const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
-        const newUser = new model_1.userExtendedModel({
-            name, surname, email, phone, password: hashedPassword, role,
-        });
-        const result = yield newUser.save();
-        return res.status(200).json({
-            message: "User registered successfully.",
-            userRegistered: result.toObject(),
-        });
-    }
-    else {
-        return res.status(403).json({
-            message: "You do not have permission to create a user with the specified role.",
-        });
-    }
+    const hashedPassword = bcrypt_1.default.hashSync(password, config_1.default.HASH_ROUNDS);
+    const newUser = new model_1.userExtendedModel({
+        name, surname, email, phone, password: hashedPassword, role: 'customer',
+    });
+    const result = yield newUser.save();
+    return res.status(200).json({
+        message: "User registered successfully.",
+        userRegistered: result.toObject(),
+    });
 });
 exports.register = register;
+// export const register = async (req: Request, res: Response) => {
+//   const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,16}$/;
+//   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+//   const { name, surname, email, phone, password, role } = req.body;
+//   const requestingUserRole = req.token?.role;
+//   if (!email || !password ) {
+//     return handleBadRequest(res);
+//   }
+//   if (!passwordRegex.test(password)) {
+//     return res.status(400).json({
+//       message: "The password does not meet the requirements. It must be between 8 and 16 characters, contain at least one uppercase letter, one digit, and one special character.",
+//     });
+//   }
+//   if (!emailRegex.test(email)) {
+//     return res.status(400).json({
+//       message: "Invalid email address format.",
+//     });
+//   }
+//   const userFound = await userExtendedModel.findOne({ email });
+//   if (userFound) {
+//     return res.status(409).json({
+//       message: "There is already a registered user with that email address.",
+//     });
+//   }
+//   if (role === 'customer') {
+//     const hashedPassword = bcrypt.hashSync(password, CONF.HASH_ROUNDS);
+//     const newUser = new userExtendedModel({
+//       name, surname, email, phone, password: hashedPassword, role,
+//     });
+//     const result = await newUser.save();
+//     return res.status(200).json({
+//       message: "User registered successfully.",
+//       userRegistered: result.toObject(),
+//     });
+//   } else if (requestingUserRole === 'admin') {
+//     const hashedPassword = bcrypt.hashSync(password, CONF.HASH_ROUNDS);
+//     const newUser = new userExtendedModel({
+//       name, surname, email, phone, password: hashedPassword, role,
+//     });
+//     const result = await newUser.save();
+//     return res.status(200).json({
+//       message: "User registered successfully.",
+//       userRegistered: result.toObject(),
+//     });
+//   } else {
+//     return res.status(403).json({
+//       message: "You do not have permission to create a user with the specified role.",
+//     });
+//   }
+// };
 const findUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _b;
     const requestingUserRole = (_b = req.token) === null || _b === void 0 ? void 0 : _b.role;
-    if (requestingUserRole !== "admin") {
+    if (requestingUserRole !== 'admin') {
         return (0, errorHandlers_1.handleUnauthorized)(res);
     }
-    let users = yield model_1.userExtendedModel.find();
-    const { sort, search, role } = req.query;
-    if (role && typeof role === "string") {
-        users = users.filter((user) => user.role === role);
+    const { page = 1, limit = 10, sort, search, role } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    try {
+        let query = model_1.userExtendedModel.find();
+        const users = yield query.skip(skip).limit(parseInt(limit, 10));
+        if (role && typeof role === 'string') {
+            query = query.where({ role });
+        }
+        if (sort === 'ASC') {
+            query = query.sort({ name: 1 });
+        }
+        else if (sort === 'DSC') {
+            query = query.sort({ name: -1 });
+        }
+        if (search && typeof search === 'string') {
+            query = query.find({
+                $or: [
+                    { name: { $regex: new RegExp(search, 'i') } },
+                    { email: { $regex: new RegExp(search, 'i') } },
+                ],
+            });
+        }
+        console.log("Users found:", users);
+        return res.status(200).json(users);
     }
-    if (sort === "ASC") {
-        users = users.sort((a, b) => a.name.localeCompare(b.name));
+    catch (error) {
+        console.error('Error fetching users:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-    else if (sort === "DSC") {
-        users = users.sort((a, b) => b.name.localeCompare(a.name));
-    }
-    if (search && typeof search === "string") {
-        users = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
-    }
-    return res.status(200).json(users);
 });
 exports.findUsers = findUsers;
+// export const findUsers = async (req: Request, res: Response) => {
+//   const requestingUserRole = req.token?.role;
+//   if (requestingUserRole !== "admin") {
+//     return handleUnauthorized(res);
+//   }
+//   let users = await userExtendedModel.find();
+//   const { sort, search, role } = req.query;
+//   if (role && typeof role === "string") {
+//     users = users.filter((user) => user.role === role);
+//   }
+//   if (sort === "ASC") {
+//     users = users.sort((a, b) => a.name.localeCompare(b.name));
+//   } else if (sort === "DSC") {
+//     users = users.sort((a, b) => b.name.localeCompare(a.name));
+//   }
+//   if (search && typeof search === "string") {
+//     users = users.filter((user) =>
+//       user.name.toLowerCase().includes(search.toLowerCase())
+//     );
+//   }
+//   return res.status(200).json(users);
+// };
 const findCustomer = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _c, _d;
     const { _id } = req.params;
@@ -153,6 +221,7 @@ const modifyUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (!user || (roleIdFromToken === 'customer' && userIdFromToken !== user._id.toString()) || (roleIdFromToken !== 'admin' && userIdFromToken !== user._id.toString())) {
         return res.status(403).json({
             message: unauthorizedMessage,
+            details: "Additional details about why the request is unauthorized.",
         });
     }
     if (name)

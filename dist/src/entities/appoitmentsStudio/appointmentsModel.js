@@ -30,6 +30,8 @@ const appointmentsExtendedSchema = new mongoose_1.Schema({
     tattooArtistId: { type: mongoose_1.Types.ObjectId, ref: 'Users', maxlength: 24 },
     phoneCustomer: { type: Number, maxlength: 9 },
     phoneTattooArtist: { type: Number, maxlength: 9 },
+    nameCustomer: { type: String, maxlength: 10 },
+    nameTattooArtist: { type: String, maxlength: 15 },
     date: Date,
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
